@@ -1,4 +1,5 @@
-import java.util.Date;
+import java.util.ArrayList;
+import com.google.gson.GsonBuilder;
 
 /**
  * NoobChain
@@ -7,19 +8,19 @@ import java.util.Date;
  */
 public class NoobChain {
 
+  public static ArrayList<Block> blockchain = new ArrayList<Block>();
+
   public static void main(String[] args) {
-    Block genesisBlock = new Block("Im First Block in the chain.", "0");
-    System.out.println("Hash for Block-1 : " + genesisBlock.hash);
+    // Add blocks to blockchain ArrayList
+    blockchain.add(new Block("Im First Block in the chain.", "0"));
+    blockchain.add(new Block(
+      "Im Second Block in the chain.", blockchain.get(blockchain.size()-1).hash));
+    blockchain.add(new Block(
+      "Im Third Block in the chain.", blockchain.get(blockchain.size()-1).hash));
 
-    Block secondBlock = new Block(
-      "Im Second Block in the chain.", genesisBlock.hash
-    );
-    System.out.println("Hash for Block-2 : " + secondBlock.hash);
+    String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);
+    System.out.println("Json Blocks\n " + blockchainJson);
 
-    Block thirdBlock = new Block(
-      "Im Third Block in the chain.", secondBlock.hash
-    );
-    System.out.println("Hash for Block-3 : " + thirdBlock.hash);
   }
 
 }

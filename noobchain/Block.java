@@ -1,7 +1,9 @@
+package noobchain;
+
 import java.util.Date;
 
 /**
- * Block class
+ * noobchain.Block class
  *
  * @see https://medium.com/programmers-blockchain/create-simple-blockchain-java-tutorial-from-scratch-6eeed3cb03fa
  */
@@ -34,6 +36,6 @@ public class Block {
       nonce++;
       hash = calculateHash();
     }
-    System.out.println("Block mined!!! : " + hash);
+    System.out.println("noobchain.Block mined!!! : " + hash);
   }
 }

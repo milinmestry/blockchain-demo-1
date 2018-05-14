@@ -1,10 +1,13 @@
+package noobchain;
+
 import java.util.ArrayList;
 import com.google.gson.GsonBuilder;
+import noobchain.Block;
 
 /**
- * NoobChain
+ * noobchain.NoobChain
  *
- * @see https://medium.com/programmers-blockchain/create-simple-blockchain-java-tutorial-from-scratch-6eeed3cb03fa
+ * https://medium.com/programmers-blockchain/create-simple-blockchain-java-tutorial-from-scratch-6eeed3cb03fa
  */
 public class NoobChain {
 
@@ -13,18 +16,18 @@ public class NoobChain {
 
   public static void main(String[] args) {
     // Add blocks to blockchain ArrayList
-    blockchain.add(new Block("Im First Block in the chain.", "0"));
-    System.out.println("Trying to mine Block 1.");
+    blockchain.add(new Block("Im First noobchain.Block in the chain.", "0"));
+    System.out.println("Trying to mine noobchain.Block 1.");
     blockchain.get(0).mineBlock(difficulty);
 
     blockchain.add(new Block(
-      "Im Second Block in the chain.", blockchain.get(blockchain.size()-1).hash));
-    System.out.println("Trying to mine Block 2.");
+      "Im Second noobchain.Block in the chain.", blockchain.get(blockchain.size()-1).hash));
+    System.out.println("Trying to mine noobchain.Block 2.");
     blockchain.get(1).mineBlock(difficulty);
 
     blockchain.add(new Block(
-      "Im Third Block in the chain.", blockchain.get(blockchain.size()-1).hash));
-    System.out.println("Trying to mine Block 3.");
+      "Im Third noobchain.Block in the chain.", blockchain.get(blockchain.size()-1).hash));
+    System.out.println("Trying to mine noobchain.Block 3.");
     blockchain.get(2).mineBlock(difficulty);
 
     System.out.println("\nIs Blockchain valid? " + isChainValid());

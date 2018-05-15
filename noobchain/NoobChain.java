@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 
 /**
  * noobchain.NoobChain
@@ -13,7 +14,11 @@ import java.util.Base64;
 public class NoobChain {
 
   public static ArrayList<Block> blockchain = new ArrayList<Block>();
+  // list of all unspent transactions
+  public static HashMap<String, TransactionOutput> UTXOs = new HashMap<String, TransactionOutput>();
   public static int difficulty = 5;
+  public static float minimumTransaction = 0.1f;
+  public static Transaction genesisTrasaction;
   public static Wallet walletA;
   public static Wallet walletB;
 
@@ -24,6 +29,30 @@ public class NoobChain {
     // New Wallets
     walletA = new Wallet();
     walletB = new Wallet();
+    Wallet coinBase = new Wallet();
+
+    // Create a genesis transaction which send 100 noobcoins to WalletA
+    genesisTrasaction = new Transaction(
+      coinBase.publicKey, walletA.publicKey, 100f, null);
+    genesisTrasaction.generateSignature(coinBase.priavteKey);
+    genesisTrasaction.transactionId = "0"; // manually set transactionId
+    genesisTrasaction.outputs.add(new TransactionOutput(
+      genesisTrasaction.recipient, genesisTrasaction.value, genesisTrasaction.transactionId
+    ));
+    // its important to store our first transaction in the UTXOs list
+    UTXOs.put(genesisTrasaction.outputs.get(0).id, genesisTrasaction.outputs.get(0));
+
+    System.out.println("Creating and miningn genesis block.");
+    Block genesis = new Block("0");
+    genesis.addTransaction(genesisTrasaction);
+    addBlock(genesis);
+
+    // testing
+    Block block1 = new Block(genesis.hash);
+    System.out.println("\nWalletA balance=" + walletA.getBalance());
+    System.out.println("Attempt to transfer funds 40 to walletB");
+    block1.addTransaction(walletA.sendFunds(walletB.publicKey, 40f));
+    addBlock(block1);
 
     // Test public and private keys
     System.out.println("[wallet A] public and private keys:");

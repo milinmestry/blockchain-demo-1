@@ -53,42 +53,23 @@ public class NoobChain {
     System.out.println("Attempt to transfer funds 40 to walletB");
     block1.addTransaction(walletA.sendFunds(walletB.publicKey, 40f));
     addBlock(block1);
+    System.out.println("\nWallertA balance=" + walletA.getBalance());
+    System.out.println("WallertB balance=" + walletB.getBalance());
 
-    // Test public and private keys
-    System.out.println("[wallet A] public and private keys:");
-    System.out.println(StringUtil.getStringFromKey(walletA.priavteKey));
-    System.out.println(StringUtil.getStringFromKey(walletA.publicKey));
+    Block block2 = new Block(block1.hash);
+    System.out.println("Attempt to send more funds (1000) than it has.");
+    block2.addTransaction(walletA.sendFunds(walletB.publicKey, 1000f));
+    addBlock(block2);
+    System.out.println("\nWallertA balance=" + walletA.getBalance());
+    System.out.println("WallertB balance=" + walletB.getBalance());
 
-    // Create a test transaction from WalletA to WalletB
-    Transaction transaction = new Transaction(
-      walletA.publicKey, walletB.publicKey, 5, null);
-    transaction.generateSignature(walletA.priavteKey);
+    Block block3 = new Block(block2.hash);
+    System.out.println("Attempt to send 20 funds from WalletB to WalletA.");
+    block3.addTransaction(walletB.sendFunds(walletA.publicKey, 20f));
+    System.out.println("\nWallertA balance=" + walletA.getBalance());
+    System.out.println("WallertB balance=" + walletB.getBalance());
 
-    // Verify signature works using public key
-    System.out.println("Is signature verified?");
-    System.out.println(transaction.verifySignature());
-
-
-    // Add blocks to blockchain ArrayList
-//    blockchain.add(new Block("Im First noobchain.Block in the chain.", "0"));
-//    System.out.println("Trying to mine noobchain.Block 1.");
-//    blockchain.get(0).mineBlock(difficulty);
-//
-//    blockchain.add(new Block(
-//      "Im Second noobchain.Block in the chain.", blockchain.get(blockchain.size()-1).hash));
-//    System.out.println("Trying to mine noobchain.Block 2.");
-//    blockchain.get(1).mineBlock(difficulty);
-//
-//    blockchain.add(new Block(
-//      "Im Third noobchain.Block in the chain.", blockchain.get(blockchain.size()-1).hash));
-//    System.out.println("Trying to mine noobchain.Block 3.");
-//    blockchain.get(2).mineBlock(difficulty);
-//
-//    System.out.println("\nIs Blockchain valid? " + isChainValid());
-//
-//    String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);
-//    System.out.println("Json Blocks\n " + blockchainJson);
-
+    isChainValid();
   }
 
   public static Boolean isChainValid() {
@@ -97,6 +78,8 @@ public class NoobChain {
 
     int len = blockchain.size();
     String hashTarget = new String(new char[difficulty]).replace('\0', '0');
+    HashMap<String, TransactionOutput> tempUTXOs = new HashMap<String, TransactionOutput>();
+    tempUTXOs.put(genesisTrasaction.outputs.get(0).id, genesisTrasaction.outputs.get(0));
 
     for (int i = 1; i < len; i++) {
       currentBlock = blockchain.get(i);
@@ -119,8 +102,61 @@ public class NoobChain {
         System.out.println("This block hasn't been mined.");
         return false;
       }
+      
+      TransactionOutput tempOutput;
+      int cbLen = currentBlock.transactions.size();
+
+      for (int j = 0; j < cbLen; j++) {
+        Transaction currentTransaction = currentBlock.transactions.get(j);
+
+        if (!currentTransaction.verifySignature()) {
+          System.out.println("Signature on transaction (" + j + ") is Invalid.");
+          return false;
+        }
+
+        if (currentTransaction.getInputsValue() != currentTransaction.getOutputsValue()) {
+          System.out.println("Inputs and Outputs are not equal on transaction (" + j + ")");
+          return false;
+        }
+
+        for (TransactionInput input : currentTransaction.inputs) {
+          tempOutput = tempUTXOs.get(input.transactionOutputId);
+
+          if (tempOutput == null) {
+            System.out.println("Reference input on transaction (" + j + ") is missing.");
+            return false;
+          }
+
+          if (input.UTXO.value != tempOutput.value) {
+            System.out.println("Reference input transaction (" + j + ") is invalid.");
+            return false;
+          }
+          UTXOs.remove(input.transactionOutputId);
+        }
+
+        for (TransactionOutput output : currentTransaction.outputs) {
+          tempUTXOs.put(output.id, output);
+        }
+
+        if (currentTransaction.outputs.get(0).recipient != currentTransaction.recipient) {
+          System.out.println("Transaction (" + j + ") output recipient is not who it should be.");
+          return false;
+        }
+
+        if (currentTransaction.outputs.get(1).recipient != currentTransaction.sender) {
+          System.out.println("Transaction (" + j + ") output 'change' is not sender.");
+          return false;
+        }
+      }
     }
+
+    System.out.println("Blockchain is valid.");
     return true;
+  }
+
+  public static void addBlock(Block newBlock) {
+    newBlock.mineBlock(difficulty);
+    blockchain.add(newBlock);
   }
 
 }

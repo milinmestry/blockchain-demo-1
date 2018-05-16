@@ -113,7 +113,7 @@ public class Transaction {
   public float getOutputsValue() {
     float total = 0;
     for (TransactionOutput o : outputs) {
-      total += i.UTXO.value;
+      total += o.value;
     }
     return total;
   }
